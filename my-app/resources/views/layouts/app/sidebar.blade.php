@@ -15,8 +15,11 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="document-text" :href="route('notes.index')" :current="request()->routeIs('notes.*')" wire:navigate>
+                    <flux:sidebar.item icon="document-text" :href="route('notes.index')" :current="request()->routeIs('notes.index')" wire:navigate>
                         {{ __('My Notes') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="globe-alt" :href="route('notes.public')" :current="request()->routeIs('notes.public')" wire:navigate>
+                        {{ __('Public Notes') }}
                     </flux:sidebar.item>
                     @if(auth()->user()->isAdmin())
                         <flux:sidebar.item icon="clipboard-document-list" :href="route('notes.pending-reviews')" :current="request()->routeIs('notes.pending-reviews')" wire:navigate>

@@ -20,4 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('notes/{note}/reject', [NotesController::class, 'reject'])->name('notes.reject');
 });
 
+// Public notes (accessible without auth)
+Route::get('public-notes', [NotesController::class, 'publicNotes'])->name('notes.public');
+
 require __DIR__.'/settings.php';

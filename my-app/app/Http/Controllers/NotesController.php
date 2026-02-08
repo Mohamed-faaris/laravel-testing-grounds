@@ -173,4 +173,17 @@ class NotesController extends Controller
 
         return redirect()->route('notes.pending-reviews')->with('error', 'Could not reject note.');
     }
+
+    /**
+     * Display all published notes (public access).
+     */
+    public function publicNotes(): View
+    {
+        $publicNotes = Note::with('user')
+            ->where('status', 'published')
+            ->latest()
+            ->paginate(12);
+
+        return view('notes.public', compact('publicNotes'));
+    }
 }
