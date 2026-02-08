@@ -12,7 +12,7 @@ class NotePolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -28,7 +28,7 @@ class NotePolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -61,5 +61,13 @@ class NotePolicy
     public function forceDelete(User $user, Note $note): bool
     {
         return false;
+    }
+
+    /**
+     * Determine whether the user is an admin.
+     */
+    public function admin(User $user): bool
+    {
+        return $user->isAdmin();
     }
 }

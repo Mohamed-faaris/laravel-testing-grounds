@@ -15,7 +15,7 @@ class NoteController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->role === 'admin') {
+        if ($user->isAdmin()) {
             $notes = Note::with('user')->latest()->paginate(10);
         } else {
             $notes = Note::where('user_id', $user->id)->latest()->paginate(10);
@@ -39,6 +39,7 @@ class NoteController extends Controller
         ]);
 
         $validated['user_id'] = Auth::id();
+        $validated['status'] = Note::STATUS_PRIVATE;
 
         Note::create($validated);
 
@@ -50,7 +51,7 @@ class NoteController extends Controller
         $this->authorize('view', $note);
 
         return Inertia::render('notes/show', [
-            'note' => $note->load('user'),
+            'note' => $note->load(['user', 'reviewer']),
         ]);
     }
 
@@ -84,5 +85,96 @@ class NoteController extends Controller
         $note->delete();
 
         return redirect()->route('notes.index')->with('success', 'Note deleted successfully.');
+    }
+
+    /**
+     * Submit note for publication review
+     */
+    public function submitForReview(Note $note): RedirectResponse
+    {
+        $this->authorize('update', $note);
+
+        if (! $note->canBePublished()) {
+            return redirect()->back()->with('error', 'This note cannot be submitted for review.');
+        }
+
+        $note->update([
+            'status' => Note::STATUS_PENDING,
+        ]);
+
+        return redirect()->route('notes.index')->with('success', 'Note submitted for review. An admin will review it shortly.');
+    }
+
+    /**
+     * Admin: Show pending notes for review
+     */
+    public function pendingReview(): Response
+    {
+        $this->authorize('admin', Note::class);
+
+        $notes = Note::with('user')
+            ->pending()
+            ->latest()
+            ->paginate(10);
+
+        return Inertia::render('notes/pending', [
+            'notes' => $notes,
+        ]);
+    }
+
+    /**
+     * Admin: Approve and publish a note
+     */
+    public function approve(Note $note, Request $request): RedirectResponse
+    {
+        $this->authorize('admin', Note::class);
+
+        $validated = $request->validate([
+            'review_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $note->update([
+            'status' => Note::STATUS_PUBLISHED,
+            'published_at' => now(),
+            'reviewed_by' => Auth::id(),
+            'review_notes' => $validated['review_notes'] ?? null,
+        ]);
+
+        return redirect()->route('notes.pending')->with('success', 'Note published successfully!');
+    }
+
+    /**
+     * Admin: Reject a note
+     */
+    public function reject(Note $note, Request $request): RedirectResponse
+    {
+        $this->authorize('admin', Note::class);
+
+        $validated = $request->validate([
+            'review_notes' => 'required|string|max:1000',
+        ]);
+
+        $note->update([
+            'status' => Note::STATUS_REJECTED,
+            'reviewed_by' => Auth::id(),
+            'review_notes' => $validated['review_notes'],
+        ]);
+
+        return redirect()->route('notes.pending')->with('success', 'Note rejected with feedback.');
+    }
+
+    /**
+     * Show public published notes (accessible to guests)
+     */
+    public function publicNotes(): Response
+    {
+        $notes = Note::with('user')
+            ->published()
+            ->latest('published_at')
+            ->paginate(12);
+
+        return Inertia::render('notes/public', [
+            'notes' => $notes,
+        ]);
     }
 }
