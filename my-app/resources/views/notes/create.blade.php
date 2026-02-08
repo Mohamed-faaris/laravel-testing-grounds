@@ -38,12 +38,16 @@
                     @enderror
                 </div>
 
-                <div>
-                    <flux:switch
-                        name="is_public"
-                        label="{{ __('Make this note public') }}"
-                        description="{{ __('Public notes can be viewed by anyone') }}"
-                    />
+                <div class="rounded-lg bg-blue-50 p-4 dark:bg-blue-950">
+                    <div class="flex">
+                        <flux:icon name="information-circle" class="size-5 text-blue-400" />
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">{{ __('Publication Process') }}</h3>
+                            <div class="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                                <p>{{ __('Notes are created as drafts. To make them public, submit them for admin review after creation.') }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-4 pt-4">

@@ -18,6 +18,11 @@
                     <flux:sidebar.item icon="document-text" :href="route('notes.index')" :current="request()->routeIs('notes.*')" wire:navigate>
                         {{ __('My Notes') }}
                     </flux:sidebar.item>
+                    @if(auth()->user()->isAdmin())
+                        <flux:sidebar.item icon="clipboard-document-list" :href="route('notes.pending-reviews')" :current="request()->routeIs('notes.pending-reviews')" wire:navigate>
+                            {{ __('Pending Reviews') }}
+                        </flux:sidebar.item>
+                    @endif
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

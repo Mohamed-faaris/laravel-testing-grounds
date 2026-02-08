@@ -21,27 +21,37 @@ class NoteFactory extends Factory
             'user_id' => User::factory(),
             'title' => fake()->sentence(4),
             'content' => fake()->paragraphs(3, true),
-            'is_public' => fake()->boolean(20),
+            'status' => fake()->randomElement(['draft', 'draft', 'draft', 'pending_review', 'published']), // Weighted towards draft
         ];
     }
 
     /**
-     * Indicate that the note is public.
+     * Indicate that the note is published.
      */
-    public function public(): static
+    public function published(): static
     {
         return $this->state(fn (array $attributes) => [
-            'is_public' => true,
+            'status' => 'published',
         ]);
     }
 
     /**
-     * Indicate that the note is private.
+     * Indicate that the note is a draft.
      */
-    public function private(): static
+    public function draft(): static
     {
         return $this->state(fn (array $attributes) => [
-            'is_public' => false,
+            'status' => 'draft',
+        ]);
+    }
+
+    /**
+     * Indicate that the note is pending review.
+     */
+    public function pendingReview(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'pending_review',
         ]);
     }
 }

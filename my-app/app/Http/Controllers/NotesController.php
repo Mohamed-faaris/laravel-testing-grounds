@@ -42,11 +42,10 @@ class NotesController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'is_public' => 'boolean',
         ]);
 
         $validated['user_id'] = Auth::id();
-        $validated['is_public'] = $request->boolean('is_public');
+        $validated['status'] = 'draft'; // All new notes start as drafts
 
         Note::create($validated);
 
@@ -60,7 +59,7 @@ class NotesController extends Controller
     {
         $user = Auth::user();
 
-        if (! $user->isAdmin() && $note->user_id !== $user->id && ! $note->is_public) {
+        if (! $user->isAdmin() && $note->user_id !== $user->id && ! $note->isPublished()) {
             abort(403);
         }
 
@@ -95,10 +94,7 @@ class NotesController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'is_public' => 'boolean',
         ]);
-
-        $validated['is_public'] = $request->boolean('is_public');
 
         $note->update($validated);
 
@@ -106,18 +102,75 @@ class NotesController extends Controller
     }
 
     /**
-     * Remove the specified note from storage.
+     * Submit a note for publication review.
      */
-    public function destroy(Note $note): RedirectResponse
+    public function submitForReview(Note $note): RedirectResponse
     {
         $user = Auth::user();
 
-        if (! $user->isAdmin() && $note->user_id !== $user->id) {
+        if ($note->user_id !== $user->id) {
             abort(403);
         }
 
-        $note->delete();
+        if ($note->submitForReview()) {
+            return redirect()->route('notes.index')->with('success', 'Note submitted for review.');
+        }
 
-        return redirect()->route('notes.index')->with('success', 'Note deleted successfully.');
+        return redirect()->route('notes.index')->with('error', 'Could not submit note for review.');
+    }
+
+    /**
+     * Display pending reviews for admin approval.
+     */
+    public function pendingReviews(): View
+    {
+        $user = Auth::user();
+
+        if (! $user->isAdmin()) {
+            abort(403);
+        }
+
+        $pendingNotes = Note::with('user')
+            ->where('status', 'pending_review')
+            ->latest()
+            ->paginate(10);
+
+        return view('notes.pending-reviews', compact('pendingNotes'));
+    }
+
+    /**
+     * Approve a note for publication.
+     */
+    public function approve(Note $note): RedirectResponse
+    {
+        $user = Auth::user();
+
+        if (! $user->isAdmin()) {
+            abort(403);
+        }
+
+        if ($note->approve()) {
+            return redirect()->route('notes.pending-reviews')->with('success', 'Note approved and published.');
+        }
+
+        return redirect()->route('notes.pending-reviews')->with('error', 'Could not approve note.');
+    }
+
+    /**
+     * Reject a note.
+     */
+    public function reject(Note $note): RedirectResponse
+    {
+        $user = Auth::user();
+
+        if (! $user->isAdmin()) {
+            abort(403);
+        }
+
+        if ($note->reject()) {
+            return redirect()->route('notes.pending-reviews')->with('success', 'Note rejected.');
+        }
+
+        return redirect()->route('notes.pending-reviews')->with('error', 'Could not reject note.');
     }
 }

@@ -39,13 +39,23 @@
                     @enderror
                 </div>
 
-                <div>
-                    <flux:switch
-                        name="is_public"
-                        label="{{ __('Make this note public') }}"
-                        description="{{ __('Public notes can be viewed by anyone') }}"
-                        :checked="$note->is_public"
-                    />
+                <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Current Status:') }}</span>
+                            <flux:badge variant="solid" :color="$note->getStatusBadgeColor()" size="sm">
+                                {{ $note->getStatusBadgeText() }}
+                            </flux:badge>
+                        </div>
+                        @if($note->isDraft() && $note->user_id === auth()->id())
+                            <form method="POST" action="{{ route('notes.submit-for-review', $note) }}" class="inline">
+                                @csrf
+                                <flux:button type="submit" variant="outline" size="sm">
+                                    {{ __('Submit for Review') }}
+                                </flux:button>
+                            </form>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-4 pt-4">

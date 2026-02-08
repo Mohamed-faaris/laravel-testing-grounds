@@ -27,19 +27,43 @@ class DatabaseSeeder extends Seeder
             'role' => 'user',
         ]);
 
-        // Create notes for admin
-        Note::factory(5)->create([
+        // Create notes for admin with different statuses
+        Note::factory()->create([
             'user_id' => $admin->id,
+            'title' => 'Published Admin Note',
+            'status' => 'published',
+        ]);
+        Note::factory()->create([
+            'user_id' => $admin->id,
+            'title' => 'Draft Admin Note',
+            'status' => 'draft',
         ]);
 
-        // Create notes for user
-        Note::factory(5)->create([
+        // Create notes for user with different statuses
+        Note::factory()->create([
             'user_id' => $user->id,
+            'title' => 'User Draft Note',
+            'status' => 'draft',
+        ]);
+        Note::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'User Pending Review Note',
+            'status' => 'pending_review',
+        ]);
+        Note::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'User Published Note',
+            'status' => 'published',
+        ]);
+        Note::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'User Rejected Note',
+            'status' => 'rejected',
         ]);
 
         // Create additional random users with notes
         User::factory(3)
-            ->has(Note::factory(3))
+            ->has(Note::factory(2))
             ->create();
     }
 }

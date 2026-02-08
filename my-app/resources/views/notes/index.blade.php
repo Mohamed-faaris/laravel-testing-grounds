@@ -11,9 +11,16 @@
                     @endif
                 </p>
             </div>
-            <flux:button href="{{ route('notes.create') }}" variant="primary" icon="plus">
-                {{ __('New Note') }}
-            </flux:button>
+            <div class="flex gap-2">
+                @if(auth()->user()->isAdmin())
+                    <flux:button href="{{ route('notes.pending-reviews') }}" variant="outline" icon="clipboard-document-list">
+                        {{ __('Pending Reviews') }}
+                    </flux:button>
+                @endif
+                <flux:button href="{{ route('notes.create') }}" variant="primary" icon="plus">
+                    {{ __('New Note') }}
+                </flux:button>
+            </div>
         </div>
 
         @if(session('success'))
@@ -27,17 +34,17 @@
                 <div class="relative overflow-hidden rounded-xl border border-zinc-200 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900">
                     <div class="mb-4 flex items-start justify-between">
                         <div class="flex items-center gap-2">
-                            @if($note->is_public)
-                                <flux:badge variant="solid" color="emerald" size="sm">
-                                    {{ __('Public') }}
-                                </flux:badge>
-                            @else
-                                <flux:badge variant="solid" color="zinc" size="sm">
-                                    {{ __('Private') }}
-                                </flux:badge>
-                            @endif
+                            <flux:badge variant="solid" :color="$note->getStatusBadgeColor()" size="sm">
+                                {{ $note->getStatusBadgeText() }}
+                            </flux:badge>
                         </div>
                         <div class="flex gap-1">
+                            @if($note->isDraft() && $note->user_id === auth()->id())
+                                <form method="POST" action="{{ route('notes.submit-for-review', $note) }}" class="inline">
+                                    @csrf
+                                    <flux:button type="submit" variant="ghost" size="sm" icon="paper-airplane" title="{{ __('Submit for Review') }}" />
+                                </form>
+                            @endif
                             <flux:button href="{{ route('notes.edit', $note) }}" variant="ghost" size="sm" icon="pencil-square" />
                             <form method="POST" action="{{ route('notes.destroy', $note) }}" class="inline">
                                 @csrf
