@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Note extends Model
@@ -17,8 +18,9 @@ class Note extends Model
     ];
 
     protected $casts = [
-    'favorited_at' => 'datetime',
-];
+        'favorited_at' => 'datetime',
+    ];
+
     public function isFavorited()
     {
         return $this->favorited_at !== null;
@@ -41,10 +43,8 @@ class Note extends Model
         return $this->belongsTo(User::class);
     }
 
-
-    function scopeFavorited($query)
+    public function scopeFavorited($query)
     {
         return $query->whereNotNull('favorited_at');
     }
 }
-
