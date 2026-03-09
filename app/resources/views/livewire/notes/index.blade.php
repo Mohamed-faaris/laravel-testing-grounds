@@ -16,7 +16,7 @@
                     <div class="flex items-start justify-between">
                         <flux:heading level="3">{{ $note->title }}</flux:heading>
                         @if ($note->favorited_at)
-                            <flux:icon.star solid class="w-5 h-5 text-yellow-500" />
+                            <flux:icon.star solid class="w-5 h-5" color="yellow" />
                         @endif
                     </div>
                 </a>

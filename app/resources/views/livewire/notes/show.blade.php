@@ -7,7 +7,7 @@
         <div class="flex items-center gap-2">
             <flux:button wire:click="toggleFavorite" variant="ghost">
                 @if ($note->isFavorited())
-                    <flux:icon.star solid class="w-5 h-5 text-yellow-500" />
+                    <flux:icon.star solid class="w-5 h-5" color="yellow" />
                 @else
                     <flux:icon.star class="w-5 h-5" />
                 @endif
